@@ -23,11 +23,12 @@ public class myPersistenceManager {
  * if there is no previous post of this user, add new mood
  * if there is previous post, replace it
  * @param aMood
- * @return 1 if succeed, 0 if fail
+ * @return 1 if new, 2 if already exist
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked" })
 public int persistPerson(Person person){
 	PersistenceManager pm=pmf.getPersistenceManager();
+	int result = 0;
 	
 	try{
 
@@ -44,6 +45,7 @@ public int persistPerson(Person person){
 	        // Persist it to the datastore
 			person.setKey(k);
 	        pm.makePersistent(person);
+	        result = 1;
 	        
 		}
 		else{
@@ -55,20 +57,75 @@ public int persistPerson(Person person){
 			p.setGender(person.getGender());
 			p.setName(person.getName());
 			p.setPartner_email(person.getPartner_email());
-			 
+			result = 1;
 		}
-		
-
 		//posting succeeded, return 1
-		return 1;
+		
 	}finally{
 
-		pm.close();
+		pm.close();	
 		
 	}
-	   
-	
-	
+	return result;
+}
+
+/**
+ * helper method to check if a person exist in the database by name
+ * @param a person's name
+ * @return 1 if found, 0 if not found
+ */
+@SuppressWarnings({ "unchecked", "finally" })
+public Person getPersonByName(String name){
+	PersistenceManager pm=pmf.getPersistenceManager();
+	Person p = null;
+	try{	
+		Query q = pm.newQuery(Person.class,"name == aname");
+		
+		q.declareParameters("String aname");
+		List<Person> list = (List<Person>)q.execute(name);
+		
+		//if this user is not in the database
+		if(list.isEmpty()){
+		}
+		else
+		{
+			p = list.get(0);
+		}
+    }finally{
+    	pm.close();
+    	if(p != null)
+    	System.out.println(p.getName() + " " + p.getPartner_email());
+    	else
+    		System.out.println("not found");
+    	return p;
+    }
+}
+
+@SuppressWarnings({ "unchecked", "finally" })
+public Person getPersonByEmail(String email){
+	PersistenceManager pm=pmf.getPersistenceManager();
+	Person p = null;
+	try{	
+		Query q = pm.newQuery(Person.class,"email == aemail");
+		
+		q.declareParameters("String aemail");
+		List<Person> list = (List<Person>)q.execute(email);
+		
+		//if this user is not in the database
+		if(list.isEmpty()){
+		}
+		else
+		{
+			p = list.get(0);
+		}
+    }finally{
+    	pm.close();
+    	if(p != null)
+    	System.out.println(p.getName() + " " + p.getPartner_email());
+    	else
+    		System.out.println("not found");
+    	return p;
+    }
 }
 /**
  * helper method to update a person's location

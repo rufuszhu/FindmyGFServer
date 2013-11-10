@@ -1,6 +1,7 @@
 package com.rufus.rest.resource;
 
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -39,6 +40,7 @@ public class PersonResource {
      
     // Basic "is the service running" test
     @GET
+    @Path("bbb")
     @Produces(MediaType.TEXT_PLAIN)
     public String respondAsReady() {
         return "Demo service is ready!";
@@ -78,10 +80,9 @@ public class PersonResource {
     @Path("register")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    public String registerPerson(
+    public Person registerPerson(
             MultivaluedMap<String, String> personParams
             ) {
-    	System.out.println("aaaaaaaaaaaaaaaaa");
         String name = personParams.getFirst(NAME);
         String city = personParams.getFirst("city");
         String country = personParams.getFirst("country");
@@ -89,13 +90,82 @@ public class PersonResource {
         String gender = personParams.getFirst("gender");
         String email = personParams.getFirst("email");
         
-        
-        
         Person aPerson = new Person(name, city, country, partner_email, email, gender); 
-        System.out.println("Storing person: " + aPerson.getName() );
-        mpm.persistPerson(aPerson);
+        System.out.println("Storing person: " + aPerson.getName() + ", " + aPerson.getCity() + ", " +aPerson.getCountry() +", " + aPerson.getEmail() +", " + aPerson.getPartner_email() + ", " +aPerson.getGender() );
+        
+        int result = mpm.persistPerson(aPerson);
+        
+        if(result == 1)
+        return aPerson;
+        else
+        	return null;
          
-        return "Person Posted";
-                         
     }
+    
+    @GET
+    @Path("get_person_by_name/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Person getPersonName(@PathParam("name") final String name) {
+        
+        System.out.println("checking person: " + name );
+        Person person = mpm.getPersonByName(name);
+         if(person != null)
+         {
+        	 System.out.println("Returning Person" + person.getName());
+        	 return person;
+         }
+        	 
+         else
+         {
+        	 System.out.println("Not Found Person");
+        	 return null;
+         }
+        	 
+    }
+    @GET
+    @Path("get_person_by_email/{email}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Person getPersonByEmail(@PathParam("email") String email) {
+        
+        System.out.println("checking person: " + email );
+        Person person = mpm.getPersonByEmail(email);
+         if(person != null)
+         {
+        	 System.out.println("Returning Person" + person.getName());
+        	 return person;
+         }
+        	 
+         else
+         {
+        	 System.out.println("Not Found Person");
+        	 return null;
+         }
+        	 
+    }
+//    @GET
+//    @Path("check_person")
+//    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//    @Produces(MediaType.TEXT_PLAIN)
+//    public String checkExist(
+//            MultivaluedMap<String, String> personParams
+//            ) {
+//        String email = personParams.getFirst("email");
+//        
+//        System.out.println("checking person with email: " + email );
+//        int result = mpm.checkPerson(email);
+//         if(result == 1)
+//         {
+//        	 System.out.println("Found Person");
+//        	 return "Found Person";
+//         }
+//        	 
+//         else
+//         {
+//        	 System.out.println("Not Found Person");
+//        	 return "Not Found Person";
+//         }
+//        	 
+//    }
+    
+    
 }
